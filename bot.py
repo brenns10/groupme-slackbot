@@ -34,6 +34,10 @@ class SlackBot(object):
             log.info('Got system message, will not respond.')
             return 'No response (system message)'
 
+        if 'sender_type' in data and data['sender_type'] == 'bot':
+            log.info('Got bot message, will not respond.')
+            return 'No response (bot message)'
+
         context = self.context.copy()
         context['name'] = data['name']
         log.debug(data['text'])
@@ -50,7 +54,12 @@ class SlackBot(object):
 
 
 if __name__ == '__main__':
-    bot = Bot.list()[1]  # TESTING
+    bots = Bot.list()
+    if len(bots) == 1:
+        bot = bots.first
+    else:
+        print(bots)
+        bot = bots[int(input('Which bot index? '))]
     slackbot = SlackBot(bot.post)
 
     slackbot.register(r'hi slackbot', ['fuck off, {name}', 'hello, {name}!'])
