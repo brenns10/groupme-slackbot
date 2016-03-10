@@ -81,7 +81,7 @@ if __name__ == '__main__':
                        "A wizard? I'm just Harry",
                        "Listen here Hagrid, you FAT OAF!  I'm not a FUCKING WIZARD"])
     slackbot.register(r'(yer|you\'re) a (?P<something>\w+),? harry',
-                      ["I'm not a {{something}}, I'm just Harry"])
+                      ["I'm not a {something}, I'm just Harry"])
 
     # Here, we determine the callback.
     if len(sys.argv) <= 1:

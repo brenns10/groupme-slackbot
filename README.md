@@ -50,9 +50,9 @@ the following items defined:
   bot.
 
 So, for a regex like `you're a (?P<something>\w+),? harry`, you could have a
-response like `I'm not a {{something}}, I'm just Harry!`.  Then, when the
-message `You're a wizard, Harry` comes in, the bot might reply, `I'm not a
-wizard, I'm just Harry!`
+response like `I'm not a {something}, I'm just Harry!`.  Then, when the message
+`You're a wizard, Harry` comes in, the bot might reply, `I'm not a wizard, I'm
+just Harry!`
 
 Setup/Deploy
 ------------
