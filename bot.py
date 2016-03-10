@@ -45,6 +45,8 @@ class SlackBot(object):
 
         for expr, responses in self.responses:
             if expr.search(data['text']) is not None:
+                match = expr.search(data['text'])
+                context.update(match.groupdict())
                 response = random.choice(responses).format(**context)
                 log.info('Matched pattern %r, returning "%s".' %
                          (expr, response))
@@ -78,6 +80,8 @@ if __name__ == '__main__':
                       ["I'M A WHAT?", "I'm just Harry",
                        "A wizard? I'm just Harry",
                        "Listen here Hagrid, you FAT OAF!  I'm not a FUCKING WIZARD"])
+    slackbot.register(r'(yer|you\'re) a (?P<something>\w+),? harry',
+                      ["I'm not a {{something}}, I'm just Harry"])
 
     # Here, we determine the callback.
     if len(sys.argv) <= 1:
