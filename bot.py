@@ -57,4 +57,4 @@ if __name__ == '__main__':
 
     # TESTING
     app.route('/callback_test', methods=['POST'])(slackbot.callback)
-    app.run(port=30151)
+    app.run('0.0.0.0', port=30151)
