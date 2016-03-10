@@ -7,6 +7,7 @@ Run on port 30151.
 import re
 import random
 import json
+import sys
 
 from groupy import Bot
 from flask import Flask, request
@@ -54,6 +55,8 @@ class SlackBot(object):
 
 
 if __name__ == '__main__':
+
+    # This prompts the user for the bot they'd like to use.
     bots = Bot.list()
     if len(bots) == 1:
         bot = bots.first
@@ -62,8 +65,18 @@ if __name__ == '__main__':
         bot = bots[int(input('Which bot index? '))]
     slackbot = SlackBot(bot.post)
 
-    slackbot.register(r'hi slackbot', ['fuck off, {name}', 'hello, {name}!'])
+    # In this section, we register regexes with responses.
+    slackbot.register(r'(hi|hello|greetings|salutations),? slackbot',
+                      ['Fuck off, {name}', 'Hello, {name}!'])
+    slackbot.register(r'train simulator,? bitch$',
+                      ['MOTHERFUCKER WHAT YOU KNOW?!?'])
 
-    # TESTING
-    app.route('/callback', methods=['POST'])(slackbot.callback)
+    # Here, we determine the callback.
+    if len(sys.argv) <= 1:
+        route = '/callback'
+    else:
+        route = sys.argv[1]
+
+    # And, run the application.
+    app.route(route, methods=['POST'])(slackbot.callback)
     app.run('0.0.0.0', port=30151)
