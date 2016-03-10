@@ -65,5 +65,5 @@ if __name__ == '__main__':
     slackbot.register(r'hi slackbot', ['fuck off, {name}', 'hello, {name}!'])
 
     # TESTING
-    app.route('/callback_test', methods=['POST'])(slackbot.callback)
+    app.route('/callback', methods=['POST'])(slackbot.callback)
     app.run('0.0.0.0', port=30151)
