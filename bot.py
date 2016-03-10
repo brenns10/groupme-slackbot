@@ -50,10 +50,11 @@ class SlackBot(object):
 
 
 if __name__ == '__main__':
-    bot = Bot.list().first
+    bot = Bot.list()[1]  # TESTING
     slackbot = SlackBot(print)
 
     slackbot.register(r'hi slackbot', ['fuck off, {name}', 'hello, {name}!'])
 
-    app.route('/callback', methods=['POST'])(slackbot.callback)
+    # TESTING
+    app.route('/callback_test', methods=['POST'])(slackbot.callback)
     app.run(port=30151)
