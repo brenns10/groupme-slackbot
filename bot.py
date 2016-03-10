@@ -51,7 +51,7 @@ class SlackBot(object):
 
 if __name__ == '__main__':
     bot = Bot.list()[1]  # TESTING
-    slackbot = SlackBot(print)
+    slackbot = SlackBot(bot.post)
 
     slackbot.register(r'hi slackbot', ['fuck off, {name}', 'hello, {name}!'])
 
