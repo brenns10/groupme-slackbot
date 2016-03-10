@@ -70,6 +70,14 @@ if __name__ == '__main__':
                       ['Fuck off, {name}', 'Hello, {name}!'])
     slackbot.register(r'train simulator,? bitch$',
                       ['MOTHERFUCKER WHAT YOU KNOW?!?'])
+    slackbot.register(r'(^|[^0-9])151($|[^0-9])',
+                      ["you know... it's really not that bad"])
+    slackbot.register(r'(fuck|screw|i hate) slackbot',
+                      ["At least I'm not actual SlackBot."])
+    slackbot.register(r'(yer|you\'re) a wizard,? harry',
+                      ["I'M A WHAT?", "I'm just Harry",
+                       "A wizard? I'm just Harry",
+                       "Listen here Hagrid, you FAT OAF!  I'm not a FUCKING WIZARD"])
 
     # Here, we determine the callback.
     if len(sys.argv) <= 1:
