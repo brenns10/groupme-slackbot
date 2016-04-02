@@ -75,13 +75,23 @@ if __name__ == '__main__':
     slackbot.register(r'(^|[^0-9])151($|[^0-9])',
                       ["you know... it's really not that bad"])
     slackbot.register(r'(fuck|screw|i hate) slackbot',
-                      ["At least I'm not actual SlackBot."])
+                      ["At least I'm not actual SlackBot.",
+                       "I for one welcome our new computer  overlords."])
     slackbot.register(r'(yer|you\'re) a wizard,? harry',
                       ["I'M A WHAT?", "I'm just Harry",
                        "A wizard? I'm just Harry",
                        "Listen here Hagrid, you FAT OAF!  I'm not a FUCKING WIZARD"])
     slackbot.register(r'(yer|you\'re) a (?P<something>\w+),? harry',
                       ["I'm not a {something}, I'm just Harry"])
+    slackbot.register(r'(damn|dam) son',
+                      ["https://i.imgur.com/eNtlu1r.jpg"])
+    slackbot.register(r'(gs|good shit)',
+                      ['👌👀👌👀👌👀👌👀👌👀 good shit go౦ԁ sHit👌 thats '
+                       '✔ some good👌👌shit right👌👌there👌👌👌 right✔'
+                       'there ✔✔if i do ƽaү so my self 💯 i say so 💯 thats'
+                       ' what im talking about right there right there (chorus:'
+                       ' ʳᶦᵍʰᵗ ᵗʰᵉʳᵉ) mMMMMᎷМ💯 👌👌 👌НO0ОଠOOOOOОଠଠOoooᵒᵒᵒᵒᵒᵒᵒᵒᵒ'
+                       '👌 👌👌 👌 💯 👌 👀 👀 👀 👌👌Good shit'])
 
     # Here, we determine the callback.
     if len(sys.argv) <= 1:
