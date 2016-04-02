@@ -83,7 +83,7 @@ if __name__ == '__main__':
                        "Listen here Hagrid, you FAT OAF!  I'm not a FUCKING WIZARD"])
     slackbot.register(r'(yer|you\'re) a (?P<something>\w+),? harry',
                       ["I'm not a {something}, I'm just Harry"])
-    slackbot.register(r'(damn|dam) son',
+    slackbot.register(r'(damn|dam),? son',
                       ["https://i.imgur.com/eNtlu1r.jpg"])
     slackbot.register(r'(gs|good shit)',
                       ['👌👀👌👀👌👀👌👀👌👀 good shit go౦ԁ sHit👌 thats '
