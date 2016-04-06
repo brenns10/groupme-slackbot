@@ -104,7 +104,7 @@ if __name__ == '__main__':
                        "Listen here {name} you FAT OAF!  I'm not a FUCKING {wizard!u}!"])
     slackbot.register(r'(damn|dam),? son',
                       ["https://i.imgur.com/eNtlu1r.jpg"])
-    slackbot.register(r'(gs|good shit)',
+    slackbot.register(r'(\bgs\b|good shit)',
                       ['👌👀👌👀👌👀👌👀👌👀 good shit go౦ԁ sHit👌 thats '
                        '✔ some good👌👌shit right👌👌there👌👌👌 right✔'
                        'there ✔✔if i do ƽaү so my self 💯 i say so 💯 thats'
