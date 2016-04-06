@@ -8,12 +8,31 @@ import re
 import random
 import json
 import sys
+import string
 
 from groupy import Bot
 from flask import Flask, request
 
 app = Flask(__name__)
 log = app.logger
+
+
+class CustomFormatter(string.Formatter):
+
+    def convert_field(self, value, conversion):
+        try:
+            return super().convert_field(value, conversion)
+        except ValueError as e:
+            if conversion == 'u':
+                return str(value).upper()
+            elif conversion == 'l':
+                return str(value).lower()
+            elif conversion == 'w':
+                return str(value).swapcase()
+            elif conversion == 'c':
+                return str(value).capitalize()
+            else:
+                raise e
 
 
 class SlackBot(object):
@@ -23,6 +42,7 @@ class SlackBot(object):
         self.post = post
         self.responses = []
         self.context = {}
+        self.formatter = CustomFormatter()
 
     def register(self, regex, responses):
         self.responses.append((re.compile(regex, re.I), responses))
@@ -47,7 +67,8 @@ class SlackBot(object):
             if expr.search(data['text']) is not None:
                 match = expr.search(data['text'])
                 context.update(match.groupdict())
-                response = random.choice(responses).format(**context)
+                response = self.formatter.format(random.choice(responses),
+                                                 **context)
                 log.info('Matched pattern %r, returning "%s".' %
                          (expr, response))
                 self.post(response)
@@ -77,12 +98,10 @@ if __name__ == '__main__':
     slackbot.register(r'(fuck|screw|i hate) slackbot',
                       ["At least I'm not actual SlackBot.",
                        "I for one welcome our new computer  overlords."])
-    slackbot.register(r'(yer|you\'re) a wizard,? harry',
-                      ["I'M A WHAT?", "I'm just Harry",
-                       "A wizard? I'm just Harry",
-                       "Listen here Hagrid, you FAT OAF!  I'm not a FUCKING WIZARD"])
-    slackbot.register(r'(yer|you\'re) a (?P<something>\w+),? harry',
-                      ["I'm not a {something}, I'm just Harry"])
+    slackbot.register(r'(yer|you\'re) a (?P<wizard>\w+),? (?P<harry>harry|slackbot)',
+                      ["I'm not a {wizard}, I'm just {harry!c}!",
+                       "I'M A WHAT?",
+                       "Listen here {name} you FAT OAF!  I'm not a FUCKING {wizard!u}!"])
     slackbot.register(r'(damn|dam),? son',
                       ["https://i.imgur.com/eNtlu1r.jpg"])
     slackbot.register(r'(gs|good shit)',
