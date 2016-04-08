@@ -98,7 +98,7 @@ if __name__ == '__main__':
     slackbot.register(r'(fuck|screw|i hate) slackbot',
                       ["At least I'm not actual SlackBot.",
                        "I for one welcome our new computer  overlords."])
-    slackbot.register(r'(yer|you\'re) a (?P<wizard>\w+),? (?P<harry>harry|slackbot)',
+    slackbot.register(r'(yer|you\'re) a (?P<wizard>.+?),? (?P<harry>harry|slackbot)',
                       ["I'm not a {wizard}, I'm just {harry!c}!",
                        "I'M A WHAT?",
                        "Listen here {name} you FAT OAF!  I'm not a FUCKING {wizard!u}!"])
