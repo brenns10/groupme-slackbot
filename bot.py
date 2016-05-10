@@ -112,6 +112,8 @@ if __name__ == '__main__':
                        ' ʳᶦᵍʰᵗ ᵗʰᵉʳᵉ) mMMMMᎷМ💯 👌👌 👌НO0ОଠOOOOOОଠଠOoooᵒᵒᵒᵒᵒᵒᵒᵒᵒ'
                        '👌 👌👌 👌 💯 👌 👀 👀 👀 👌👌Good shit'])
     slackbot.register(r'^swagg?.?$', ['http://i.imgur.com/xCRIeHl.gif'])
+    slackbot.register(r'ligaf',
+                      ['https://media.giphy.com/media/cuXfWK07H9du0/giphy.gif'])
 
     # Here, we determine the callback.
     if len(sys.argv) <= 1:
