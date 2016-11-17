@@ -1,89 +1,118 @@
 SlackBot for GroupMe
 ====================
 
-GroupMe lacks many features of Slack, the least useful of which being the
-SlackBot response.  Not surprisingly, the least useful feature is also the
-easiest to implement.  I present to you - SlackBot responses for GroupMe!
+Have you ever wanted to have a Slackbot in your GroupMe chat? If so, you're in
+luck. This is a Python 2.7 implementation of a Slackbot that runs on AWS Lambda,
+which is a cheap and efficient way to handle webhooks without going through the
+hoops of setting up your own server to handle them.
 
-What?
+Setup
 -----
 
-GroupMe and Slack are both group messaging services.  Slackbot is a bot in Slack
-that (among many other features) can automatically reply to messages that match
-a pattern with a response chosen randomly from a list.  This project just
-implements that part of SlackBot, but for GroupMe.
+This assumes you already have an AWS account with billing info set up, as well
+as the AWS CLI installed and an IAM set up on your computer with plenty of
+permissions (in particular, you'll want all permissions for Lambda). You'll also
+want to be running Linux.
 
-This particular repository contains both the code for this bot, as well as the
-responses associated with an instance I currently run.  Chances are if you want
-to use this, you'll need to fork it and change the responses.
+You can start by forking this repository, because you'll need your own copy to
+truly make it your own.
 
-Basics
-------
+### AWS: Create Lambda Function
 
-GroupMe provides a neat API for creating bots, which can be used in Python
-through [Groupy][groupy].  You create a "Bot" object associated with a group,
-complete with a callback URL.  Whenever a message is posted in the group,
-GroupMe will POST it to your URL.  Your bot can also send messages to the group.
-So, this program just waits for callbacks from GroupMe.  When a message matches
-a pattern, the bot selects a reply and sends it to the group.
+The first step is to create an empty Lambda function. Go to Lambda in your
+Console, and click the blue "create a lambda function" button. Start from the
+Python Hello World template.
 
-Adding Responses
-----------------
+It will ask you for a trigger. Click the dotted box to create a new one. Select
+API Gateway, choose Lambda Microservice, and set the security to Open. In the
+next screen, you configure the function itself. Name it something short and
+memorable, with no spaces, preferably related to the title of the group you want
+the bot to be part of. Type an informative sentence for the description. You
+don't need to edit the code, because we'll provide it from the command line
+later. Set handler to `botgen.handle` and under Role, just create a new role
+without many permissions. Click next, go over your summarized settings, and then
+create the function.
 
-The responses are added near the bottom, using the function
-`slackbot.register()`.  My implementation of SlackBot's responses is much more
-feature rich than the one that Slack comes with (thanks to Python!).
+You should be presented with an API endpoint. Copy the URL for the next step.
 
-The first argument of the `register()` function is a regular expression, which
-means that this bot can match much more powerfully than Slackbot can.  Matching
-is done case insensitively.  When testing expressions against messages, the bot
-checks to see if the string contains a match at any index (not just index 0), so
-`pace` would match the message `blank space` unless you used the `\b` notation
-for "word boundary".
+### GroupMe: Create Bot
 
-The second argument is a list of responses, which will be randomly selected
-from.  The response will be formatted using the `string.format()` method, with
-the following items defined:
-- `name`: The name of the user sending the message.
-- Any named capture from the regular expression (neat, right?)
-- Anything else you might want to stash away in the `context` dictionary in the
-  bot.
+GroupMe has a Bot API that is tailor made for this sort of thing. You can log
+into their [developer site](https://dev.groupme.com), click on Bots in the menu,
+and create a new bot. Give it the **exact same name** as your lambda function.
+Make sure you select the correct group for it to join. Paste the API endpoint
+from Lambda into the callback URL. Finally, you can set an avatar... see the
+GroupMe docs for that. It's not required.
 
-So, for a regex like `you're a (?P<something>\w+),? harry`, you could have a
-response like `I'm not a {something}, I'm just Harry!`.  Then, when the message
-`You're a wizard, Harry` comes in, the bot might reply, `I'm not a wizard, I'm
-just Harry!`
+Create the bot and copy its ID.
 
-Setup/Deploy
-------------
+### AWS: Encrypt Bot ID
 
-I always hate code without instructions.  So here is how to get this running.
-First, you'll need Python and Pip installed.  You'll want to install the
-required packages with the command (`pip install -r requirements.txt`).  I'd
-recommend using a VirtualEnv.
+The bot ID you have is the only piece of sensitive information standing between
+the world and unlimited posting in your GroupMe channel. So you should treat it
+like an API key.
 
-Next, make sure you have a computer you can deploy to which can accept HTTP
-requests on a public hostname or IP address.  A home computer hooked up to a
-home ISP probably won't cut it.
+In the AWS console, go to the KMS section and create a new key. Make sure your
+Lambda role has access to encrypt and decrypt, as well as your normal role. Make
+a note of the name of the key.
 
-Go to the [GroupMe API][api] site and log in.  Get your access token, and save
-it in a file named `.groupy.key` on any computer you're going to run this code.
-I'd recommend restricting read permissions on this file, since your access token
-is pretty sensitive.
+In your terminal, use the following to encrypt the Bot ID. The key alias is the
+name of your key (include the `alias/` part).
 
-Now, go to the bots section of the [GroupMe API][bots].  Create one.  Give it a
-good name, since that's what will show up in the chat.  You'll probably want an
-avatar.  In order to do this, you have to upload an avatar to GroupMe's image
-hosting service, and then paste that URL in the form.  There is no public upload
-form for this, so you'll have to do `curl -F "file=@[filename.png]"
-"https://image.groupme.com/pictures?access_token=[your_token_here]"` (fill out
-the bracketed stuff yourself).  Finally, you'll want to set the callback URL to
-be `http://[your-hostname-here]/callback`.  Also, make sure you set the correct
-chat for this bot.
+```bash
+$ aws kms encrypt --plaintext ID_HERE --key-id alias/KEY_ALIAS_HERE
+```
 
-Now, after all that setup, you can run `python bot.py` on your deploy computer
-and everything should go swimmingly.
+The `CiphertextBlob` in the returned JSON object should be copied now!
 
-[api]: https://dev.groupme.com/
-[bots]: https://dev.groupme.com/bots
-[groupy]: https://pypi.python.org/pypi/GroupyAPI
+### Create Bot Stub
+
+In order for me to manage several separate bots in separate groups, I have a
+really janky system worked out in my deploy script. At runtime, it combines one
+of several headers with the main `bot.py` file, and deploys this combined file
+to Lambda.
+
+Copy one of my existing stubs (like `SlackbotTest.py`) to a file with the **same
+name** as your Lambda function and Bot name (of course, you'll need to add `.py`
+to this name). Replace the encrypted key with your own.
+
+### Deploy!
+
+At this point, you can run my `deploy.sh` script. This will generate the
+complete bot, zip it together with the `requests` library (required) and then
+upload that to your Lambda function via the AWS CLI. You need to provide as the
+first argument the name of your Lambda function, Bot, and stub (since they're
+all the same). For example:
+
+```bash
+$ ./deploy.sh SlackbotTest
+# ... many output, wow ...
+```
+
+Now, you can talk in GroupMe and get responses from the bot. I'd recommend using
+a private group for testing your bot so you don't annoy your friends too much.
+
+Configure Responses
+-------------------
+
+The responses are in [config.py]() which you'll certainly want to edit. They
+take the form of a list. The list contains a tuple for each response. The first
+element of this tuple is a regular expression that must be *found* within the
+message (the whole message need not match the regex--if you want that, anchor
+your regex with `^REGEX$`). The second element of the tuple is a list of
+responses the bot may choose to respond with. These responses will be formatted
+before being shown. You can insert:
+
+- `{name}` - the name of the person who sent the message
+- `{key}` - where key is the name of any captured field from the regular
+  expression
+
+Furthermore, you can apply some formatting elements to make formatted text fit
+in more naturally with the text from your response:
+
+- `{name!u}` puts the name in upper case (e.g. "Stephen" to "STEPHEN")
+- `{name!l}` puts the name in lower case (e.g. "Stephen" to "stephen")
+- `{name!c}` capitalizes the first letter of each word in the name (e.g.
+  "stephen" to "Stephen")
+- `{name!w}` swaps the case of each letter in the name (this one's mainly just
+  for fun) (e.g. "Stephen" to "sTEPHEN")
