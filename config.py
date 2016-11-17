@@ -59,4 +59,10 @@ RESPONSES = [
             'https://media.giphy.com/media/cuXfWK07H9du0/giphy.gif',
         ],
     ),
+    (
+        r"slackbot('s| is) back",
+        [
+            'https://media.giphy.com/media/o9TbPK48nLaZq/giphy.gif',
+        ],
+    ),
 ]
