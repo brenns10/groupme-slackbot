@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-A GroupmeBot that does auto-responses like Slackbot. Runs on AWS Lambda.
+A GroupMe bot that does auto-responses like Slackbot. Runs on AWS Lambda.
 """
 from __future__ import print_function
 
@@ -35,7 +35,7 @@ class CustomFormatter(string.Formatter):
 
     def convert_field(self, value, conversion):
         try:
-            return super().convert_field(value, conversion)
+            return super(CustomFormatter, self).convert_field(value, conversion)
         except ValueError as e:
             if conversion == 'u':
                 return str(value).upper()
@@ -61,7 +61,7 @@ def post(msg):
     return requests.post(API_URL, json=body)
 
 
-def handle(event):
+def handle(event, context):
     # Data is a JSON object which was stashed into another JSON object...
     data = json.loads(event['body'])
 
