@@ -73,7 +73,6 @@ def handle(event, context):
         print('Got bot message, will not respond.')
         return
 
-    print(data['text'])
     context = {
         'name': data['name']
     }
@@ -86,3 +85,5 @@ def handle(event, context):
                                                 **context)
             post(response)
             print(response)
+
+    print('No response.')
