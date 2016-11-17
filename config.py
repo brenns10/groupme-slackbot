@@ -60,7 +60,7 @@ RESPONSES = [
         ],
     ),
     (
-        r"slackbot('s| is) back",
+        r"slackbot('?s| is) back",
         [
             'https://media.giphy.com/media/o9TbPK48nLaZq/giphy.gif',
         ],
