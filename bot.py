@@ -18,12 +18,9 @@ from config import RESPONSES
 API_URL = 'https://api.groupme.com/v3/bots/post'
 
 # Kind of annoying to create. First, on AWS console, create key.
-# Install boto3 and aws cli, run 'aws configure', then open python:
-# >>> import boto3, base64
-# >>> c = boto3.client('kms')
-# >>> r = c.encrypt(KeyId='alias/your-alias-here', PlaintextBlob=b'your-key-id-here')
-# >>> base64.b64encode(r['CiphertextBlob'])
-# This is your encrypted bot id.
+# Install aws cli, run 'aws configure' (if you haven't already)
+# $ aws kms encrypt --plaintext ID_HERE --key-id alias/KEY_ALIAS_HERE
+# The base64-encoded CiphertextBlob is what you want.
 ENCRYPTED_BOT_ID = 'AQECAHhntcgbgv4UZX6JXua2kg8IhT6cbre0WCSiz7xcx7nC8AAAAHgwdgYJKoZIhvcNAQcGoGkwZwIBADBiBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDN+mwLRa+fibbLkFugIBEIA14FM7+iYQcGzZFElfnQgnEFxaYL3Oaz7U+mFu+OHP6ZQ8XgNd3H5sKIdmF8SDmPYFWOuQjSM='
 
 
