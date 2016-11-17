@@ -21,7 +21,7 @@ API_URL = 'https://api.groupme.com/v3/bots/post'
 # Install aws cli, run 'aws configure' (if you haven't already)
 # $ aws kms encrypt --plaintext ID_HERE --key-id alias/KEY_ALIAS_HERE
 # The base64-encoded CiphertextBlob is what you want.
-ENCRYPTED_BOT_ID = 'AQECAHhntcgbgv4UZX6JXua2kg8IhT6cbre0WCSiz7xcx7nC8AAAAHgwdgYJKoZIhvcNAQcGoGkwZwIBADBiBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDN+mwLRa+fibbLkFugIBEIA14FM7+iYQcGzZFElfnQgnEFxaYL3Oaz7U+mFu+OHP6ZQ8XgNd3H5sKIdmF8SDmPYFWOuQjSM='
+ENCRYPTED_BOT_ID = 'AQECAHhntcgbgv4UZX6JXua2kg8IhT6cbre0WCSiz7xcx7nC8AAAAHgwdgYJKoZIhvcNAQcGoGkwZwIBADBiBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDAZkSTizbKK+SI8otgIBEIA1B4n/BZN2FK8VcAQtpL6jmNbTJ+Wamv25+GxpqCeDfyhhL7tfemPWP7Gi8BDrNczREoEksYs='
 
 
 class CustomFormatter(string.Formatter):
