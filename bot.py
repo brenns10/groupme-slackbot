@@ -1,23 +1,37 @@
+# -*- coding: utf-8 -*-
 """
-Python GroupMe Bot.
-
-Run on port 30151.
+A GroupmeBot that does auto-responses like Slackbot. Runs on AWS Lambda.
 """
+from __future__ import print_function
 
+import base64
 import re
 import random
 import json
-import sys
 import string
 
-from groupy import Bot
-from flask import Flask, request
+import requests
+import boto3
 
-app = Flask(__name__)
-log = app.logger
+from config import RESPONSES
+
+API_URL = 'https://api.groupme.com/v3/bots/post'
+
+# Kind of annoying to create. First, on AWS console, create key.
+# Install boto3 and aws cli, run 'aws configure', then open python:
+# >>> import boto3, base64
+# >>> c = boto3.client('kms')
+# >>> r = c.encrypt(KeyId='alias/your-alias-here', PlaintextBlob=b'your-key-id-here')
+# >>> base64.b64encode(r['CiphertextBlob'])
+# This is your encrypted bot id.
+ENCRYPTED_BOT_ID = 'AQECAHhntcgbgv4UZX6JXua2kg8IhT6cbre0WCSiz7xcx7nC8AAAAHgwdgYJKoZIhvcNAQcGoGkwZwIBADBiBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDN+mwLRa+fibbLkFugIBEIA14FM7+iYQcGzZFElfnQgnEFxaYL3Oaz7U+mFu+OHP6ZQ8XgNd3H5sKIdmF8SDmPYFWOuQjSM='
 
 
 class CustomFormatter(string.Formatter):
+    """
+    This formatter will convert fields to string and apply an upper/lower case
+    operation on them, so that the field looks precisely the way you want it.
+    """
 
     def convert_field(self, value, conversion):
         try:
@@ -35,92 +49,39 @@ class CustomFormatter(string.Formatter):
                 raise e
 
 
-class SlackBot(object):
-    """A simple slackbot clone."""
-
-    def __init__(self, post):
-        self.post = post
-        self.responses = []
-        self.context = {}
-        self.formatter = CustomFormatter()
-
-    def register(self, regex, responses):
-        self.responses.append((re.compile(regex, re.I), responses))
-
-    def callback(self):
-        print(request.data)
-        data = json.loads(request.data.decode('utf8'))
-
-        if 'system' in data and data['system']:
-            log.info('Got system message, will not respond.')
-            return 'No response (system message)'
-
-        if 'sender_type' in data and data['sender_type'] == 'bot':
-            log.info('Got bot message, will not respond.')
-            return 'No response (bot message)'
-
-        context = self.context.copy()
-        context['name'] = data['name']
-        log.debug(data['text'])
-
-        for expr, responses in self.responses:
-            if expr.search(data['text']) is not None:
-                match = expr.search(data['text'])
-                context.update(match.groupdict())
-                response = self.formatter.format(random.choice(responses),
-                                                 **context)
-                log.info('Matched pattern %r, returning "%s".' %
-                         (expr, response))
-                self.post(response)
-                return response
-
-        return 'No response.'
+def post(msg):
+    """Post to GroupMe. Super easy. Except for the encrypted bot ID."""
+    blob = base64.b64decode(ENCRYPTED_BOT_ID)
+    client = boto3.client('kms')
+    bot_id = client.decrypt(CiphertextBlob=blob)['Plaintext']
+    body = {
+        'bot_id': bot_id,
+        'text': msg,
+    }
+    return requests.post(API_URL, json=body)
 
 
-if __name__ == '__main__':
+def handle(event):
+    # Data is a JSON object which was stashed into another JSON object...
+    data = json.loads(event['body'])
 
-    # This prompts the user for the bot they'd like to use.
-    bots = Bot.list()
-    if len(bots) == 1:
-        bot = bots.first
-    else:
-        print(bots)
-        bot = bots[int(input('Which bot index? '))]
-    slackbot = SlackBot(bot.post)
+    if 'system' in data and data['system']:
+        print('Got system message, will not respond.')
+        return
 
-    # In this section, we register regexes with responses.
-    slackbot.register(r'(hi|hello|greetings|salutations),? slackbot',
-                      ['Fuck off, {name}', 'Hello, {name}!'])
-    slackbot.register(r'train simulator,? bitch$',
-                      ['MOTHERFUCKER WHAT YOU KNOW?!?'])
-    slackbot.register(r'(^|[^0-9])151($|[^0-9])',
-                      ["you know... it's really not that bad"])
-    slackbot.register(r'(fuck|screw|i hate) slackbot',
-                      ["At least I'm not actual SlackBot.",
-                       "I for one welcome our new computer  overlords."])
-    slackbot.register(r'(yer|you\'re) a (?P<wizard>.+?),? (?P<harry>harry|slackbot)',
-                      ["I'm not a {wizard}, I'm just {harry!c}!",
-                       "I'M A WHAT?",
-                       "Listen here {name} you FAT OAF!  I'm not a FUCKING {wizard!u}!"])
-    slackbot.register(r'(damn|dam),? son',
-                      ["https://i.imgur.com/eNtlu1r.jpg"])
-    slackbot.register(r'good shit',
-                      ['👌👀👌👀👌👀👌👀👌👀 good shit go౦ԁ sHit👌 thats '
-                       '✔ some good👌👌shit right👌👌there👌👌👌 right✔'
-                       'there ✔✔if i do ƽaү so my self 💯 i say so 💯 thats'
-                       ' what im talking about right there right there (chorus:'
-                       ' ʳᶦᵍʰᵗ ᵗʰᵉʳᵉ) mMMMMᎷМ💯 👌👌 👌НO0ОଠOOOOOОଠଠOoooᵒᵒᵒᵒᵒᵒᵒᵒᵒ'
-                       '👌 👌👌 👌 💯 👌 👀 👀 👀 👌👌Good shit'])
-    slackbot.register(r'^swagg?.?$', ['http://i.imgur.com/xCRIeHl.gif'])
-    slackbot.register(r'ligaf',
-                      ['https://media.giphy.com/media/cuXfWK07H9du0/giphy.gif'])
+    if 'sender_type' in data and data['sender_type'] == 'bot':
+        print('Got bot message, will not respond.')
+        return
 
-    # Here, we determine the callback.
-    if len(sys.argv) <= 1:
-        route = '/callback'
-    else:
-        route = sys.argv[1]
+    context = {
+        'name': data['name']
+    }
 
-    # And, run the application.
-    app.route(route, methods=['POST'])(slackbot.callback)
-    app.run('0.0.0.0', port=30151)
+    for expr, responses in RESPONSES:
+        if re.search(expr, data['text'], re.I) is not None:
+            match = re.search(expr, data['text'], re.I)
+            context.update(match.groupdict())
+            response = CustomFormatter().format(random.choice(responses),
+                                                **context)
+            post(response)
+            print(response)
