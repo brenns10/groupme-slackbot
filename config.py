@@ -65,4 +65,12 @@ RESPONSES = [
             'https://media.giphy.com/media/o9TbPK48nLaZq/giphy.gif',
         ],
     ),
+    (
+        r".*\bslack\b.*\bgroupme\b.*|.*\bgroupme\b.*\bslack\b.*",
+        [
+            'We should switch to AIM!',
+            'https://s.aolcdn.com/os/landingpages/images/aim_sm.png',
+            "🍍🍍🍍 I would use smoke signals, but they don't support emoji 🍍🍍🍍",
+        ],
+    ),
 ]
