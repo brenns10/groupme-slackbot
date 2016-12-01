@@ -68,8 +68,8 @@ def handle(event, context):
     }
 
     for expr, responses in RESPONSES:
-        if re.search(expr, data['text'], re.I) is not None:
-            match = re.search(expr, data['text'], re.I)
+        if re.search(expr, data['text'], re.I | re.U) is not None:
+            match = re.search(expr, data['text'], re.I | re.U)
             context.update(match.groupdict())
             response = CustomFormatter().format(random.choice(responses),
                                                 **context)
