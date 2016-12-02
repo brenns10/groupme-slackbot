@@ -154,7 +154,7 @@ RESPONSES = [
         ],
     ),
     (
-        r'jopartment',
+        r'joe?partment',
         [
             'I think you mean Stepartment.',
             "We're calling it the Steplex now.",
