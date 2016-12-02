@@ -153,4 +153,13 @@ RESPONSES = [
             'http://marketingforcarpetcleaners.org/wp-content/uploads/2016/09/chuffed-as-nuts-guarantee-150x150.jpg',
         ],
     ),
+    (
+        r'jopartment',
+        [
+            'I think you mean Stepartment.',
+            "We're calling it the Steplex now.",
+            'Karl lives there too!',
+            "Karlpartment? It just doesn't have the same ring to it.",
+        ],
+    ),
 ]
