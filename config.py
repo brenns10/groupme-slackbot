@@ -26,7 +26,8 @@ RESPONSES = [
         [
             'https://media.giphy.com/media/urvsFBDfR6N32/giphy.gif',
             'https://media.giphy.com/media/134CbbASMeRPDa/giphy.gif',
-            'Well {verb!l} you too, {name}.\n\n{verb!c} you too.'
+            'Well {verb!l} you too, {name}.\n\n{verb!c} you too.',
+            'https://s-media-cache-ak0.pinimg.com/originals/a5/1e/9f/a51e9fc7bf72610357d84b25cc689527.jpg',
         ],
     ),
     (
@@ -168,4 +169,24 @@ RESPONSES = [
             'http://cdn.yourepeat.com/media/gif/000/060/981/3e1bcb7030bd2a8a46af871bde336d52.gif',
         ],
     ),
+    (
+        r"^(fuck.?|i'?m fucked up|(.*you )?drunk (bitch|hoe|whore|motherfucker|slob))$",
+        [
+            'https://media.giphy.com/media/gPLXXmObaJCW4/giphy.gif'
+        ],
+    ),
+    (
+        r'gumbo joe',
+        [
+            'http://weldbham.com/wp-content/uploads/2015/11/unnamed-17.jpg',
+            'http://myrecipemagic.com/uploads/recipes/72003/1423583772_gumbo-sloppy-joes.jpg',
+        ],
+    ),
+    (
+        r'(.*\bsloppy\b.*\bjoe\b.*|.*\bjoe\b.*\bsloppy\b.*)',
+        [
+            'https://cdn.meme.am/cache/instances/folder101/48979101.jpg',
+            'http://myrecipemagic.com/uploads/recipes/72003/1423583772_gumbo-sloppy-joes.jpg',
+        ],
+    )
 ]
