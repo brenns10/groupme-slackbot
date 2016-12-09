@@ -162,4 +162,10 @@ RESPONSES = [
             "Karlpartment? It just doesn't have the same ring to it.",
         ],
     ),
+    (
+        r'dank',
+        [
+            'http://cdn.yourepeat.com/media/gif/000/060/981/3e1bcb7030bd2a8a46af871bde336d52.gif',
+        ],
+    ),
 ]
