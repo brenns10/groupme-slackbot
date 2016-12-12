@@ -45,7 +45,7 @@ RESPONSES = [
         ],
     ),
     (
-        r'(yer|you\'re) a (?P<wizard>.+?),? (?P<harry>harry|slackbot)',
+        r'^(yer|you\'re) a (?P<wizard>.+?),? (?P<harry>.+)$',
         [
             "I'm not a {wizard}, I'm just {harry!c}!",
             "I'M A WHAT?",
