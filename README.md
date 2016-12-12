@@ -2,7 +2,7 @@ SlackBot for GroupMe
 ====================
 
 Have you ever wanted to have a Slackbot in your GroupMe chat? If so, you're in
-luck. This is a Python 2.7 implementation of a Slackbot that runs on AWS Lambda,
+luck. This is a Python 2/3 implementation of a Slackbot that runs on AWS Lambda,
 which is a cheap and efficient way to handle webhooks without going through the
 hoops of setting up your own server to handle them.
 
@@ -25,13 +25,11 @@ Python Hello World template.
 
 It will ask you for a trigger. Click the dotted box to create a new one. Select
 API Gateway, choose Lambda Microservice, and set the security to Open. In the
-next screen, you configure the function itself. Name it something short and
-memorable, with no spaces, preferably related to the title of the group you want
-the bot to be part of. Type an informative sentence for the description. You
-don't need to edit the code, because we'll provide it from the command line
-later. Set handler to `botgen.handle` and under Role, just create a new role
-without many permissions. Click next, go over your summarized settings, and then
-create the function.
+next screen, you configure the function itself. Name it `Slackbot`. Type an
+informative sentence for the description. You don't need to edit the code,
+because we'll provide it from the command line later. Set the handler to
+`bot.handle` and under Role, just create a new role without many permissions.
+Click next, go over your summarized settings, and then create the function.
 
 You should be presented with an API endpoint. Copy the URL for the next step.
 
@@ -39,10 +37,10 @@ You should be presented with an API endpoint. Copy the URL for the next step.
 
 GroupMe has a Bot API that is tailor made for this sort of thing. You can log
 into their [developer site](https://dev.groupme.com), click on Bots in the menu,
-and create a new bot. Give it the **exact same name** as your lambda function.
-Make sure you select the correct group for it to join. Paste the API endpoint
-from Lambda into the callback URL. Finally, you can set an avatar... see the
-GroupMe docs for that. It's not required.
+and create a new bot. You can use whatever name you'd like... Slackbot is again
+a good choice. Make sure you select the correct group for it to join. Paste the
+API endpoint from Lambda into the callback URL. Finally, you can set an
+avatar... see the GroupMe docs for that. It's not required.
 
 Create the bot and copy its ID.
 
@@ -65,32 +63,42 @@ $ aws kms encrypt --plaintext ID_HERE --key-id alias/KEY_ALIAS_HERE
 
 The `CiphertextBlob` in the returned JSON object should be copied now!
 
-### Create Bot Stub
+### Configure The Bot
 
-In order for me to manage several separate bots in separate groups, I have a
-really janky system worked out in my deploy script. At runtime, it combines one
-of several headers with the main `bot.py` file, and deploys this combined file
-to Lambda.
+The Lambda function can handle several different bots, under the assumption that
+you have one bot per group. If that's not the case... well you'll need to figure
+some stuff out on your own. For most of us, that's not a problem.
 
-Copy one of my existing stubs (like `SlackbotTest.py`) to a file with the **same
-name** as your Lambda function and Bot name (of course, you'll need to add `.py`
-to this name). Replace the encrypted key with your own.
+GroupMe's callbacks include the ID of the group a message came in, but they
+don't include any other identifying information such as the bot ID. This is
+likely because the Bot ID is sensitive; anybody in possession of your Bot ID can
+spam your group. So in order for your bot to service all the groups, there is a
+dictionary mapping group IDs to encrypted Bot IDs, which are decrypted at
+runtime.
+
+Within the `BOT_IDS` dict, delete all the entries (they're useless without my
+KMS key) and add your own, mapping the group ID (as a string) to the encrypted
+Bot ID you created above.
 
 ### Deploy!
 
-At this point, you can run my `deploy.sh` script. This will generate the
-complete bot, zip it together with the `requests` library (required) and then
-upload that to your Lambda function via the AWS CLI. You need to provide as the
-first argument the name of your Lambda function, Bot, and stub (since they're
-all the same). For example:
+At this point, you can run my `deploy.sh` script. This zips up our code along
+with the requests library, and deploys via the AWS CLI. You will need to have
+the AWS tool set up in order to use it.
 
 ```bash
-$ ./deploy.sh SlackbotTest
-# ... many output, wow ...
+$ ./deploy.sh
 ```
 
 Now, you can talk in GroupMe and get responses from the bot. I'd recommend using
 a private group for testing your bot so you don't annoy your friends too much.
+You can also test locally using:
+
+```bash
+$ python bot.py 'message'
+```
+
+This will print out responses on the terminal rather than posting to GroupMe.
 
 Configure Responses
 -------------------
