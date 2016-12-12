@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 """Slackbot response configuration.
 
-This module should contain a single list named RESPONSES. Each entry should be
-either a two or three tuple. The first element is a regular expression to be
-searched for in a message. The second element is a list of responses to be
-chosen and "formatted" before sending to the group. The last (optional) element
-is a probability that the response will be used (assumed to be 1 if not
-present).
+This module should contain a list named RESPONSES. Each entry should be either
+a two or three tuple. The first element is a regular expression to be searched
+for in a message. The second element is a list of responses to be chosen and
+"formatted" before sending to the group. The last (optional) element is a
+probability that the response will be used (assumed to be 1 if not present).
+
+This module should also contain a dict named SPECIFIC_RESPONSES. This should
+map a group ID (as a string) to a response list (similar to RESPONSES). These
+responses will be included only when a message is from that group.
 
 """
 
@@ -201,3 +204,17 @@ RESPONSES = [
         ],
     )
 ]
+
+
+SPECIFIC_RESPONSES = {
+    # SlackbotTest
+    '20457310': [
+        (
+            '.*',
+            [
+                'Are you testing me?  Why don\'t you just trust me?',
+            ],
+            0.2,
+        ),
+    ],
+}

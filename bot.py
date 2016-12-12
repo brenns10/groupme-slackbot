@@ -10,7 +10,7 @@ import string
 import requests
 import boto3
 
-from config import RESPONSES
+from config import RESPONSES, SPECIFIC_RESPONSES
 
 API_URL = 'https://api.groupme.com/v3/bots/post'
 
@@ -28,7 +28,7 @@ BOT_IDS = {
     '10203366': 'AQECAHhntcgbgv4UZX6JXua2kg8IhT6cbre0WCSiz7xcx7nC8AAAAHgwdgYJKoZIhvcNAQcGoGkwZwIBADBiBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDFuCMccp1Cy7MEYPbgIBEIA11NjJven2fcOHmcwS5CTucEMcnIccj97qKKNOhkX5aeJurCWLaMDUVyU7t8EIrDt+iGRJ/To=',
 }
 
-# For tests.
+# For tests. Not actually sent to.
 DEFAULT_GROUP = '20457310'
 
 
@@ -71,9 +71,12 @@ def get_bot_id(group):
     return bot_id.decode('ascii')
 
 
-def reply(message, context, bot_id):
+def reply(message, context, group):
     """Reply to a message that isn't a system/bot message."""
-    for tup in RESPONSES:
+    bot_id = get_bot_id(group)
+    all_responses = RESPONSES + SPECIFIC_RESPONSES.get(group, [])
+
+    for tup in all_responses:
         # Unpack response tuple.
         expr = tup[0]
         responses = tup[1]
@@ -109,14 +112,13 @@ def handle(event, context):
         print('Got bot message, will not respond.')
         return
 
-    bot_id = get_bot_id(data['group_id'])
     context = {
         'name': data['name']
     }
-    reply(data['text'], context, bot_id)
+    reply(data['text'], context, data['group_id'])
 
 
 if __name__ == '__main__':
     import sys
     post = lambda x, y: print(x)
-    reply(sys.argv[1], {'name': 'stdin'}, get_bot_id(DEFAULT_GROUP))
+    reply(sys.argv[1], {'name': 'stdin'}, DEFAULT_GROUP)

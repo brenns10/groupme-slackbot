@@ -1,2 +1,4 @@
 venv
 package.zip
+__pycache__
+*.pyc
