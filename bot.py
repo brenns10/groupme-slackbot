@@ -1,3 +1,6 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+
 import base64
 import re
 import random
@@ -11,10 +14,18 @@ from config import RESPONSES
 
 API_URL = 'https://api.groupme.com/v3/bots/post'
 
-# Kind of annoying to create. First, on AWS console, create key.
-# Install aws cli, run 'aws configure' (if you haven't already)
-# $ aws kms encrypt --plaintext ID_HERE --key-id alias/KEY_ALIAS_HERE
-# The base64-encoded CiphertextBlob is what you want.
+# Maps group IDs to bots within those groups, so we can serve multiple bots.
+BOT_IDS = {
+    # SlackbotCleveland
+    '24993946': 'AQECAHhntcgbgv4UZX6JXua2kg8IhT6cbre0WCSiz7xcx7nC8AAAAHgwdgYJKoZIhvcNAQcGoGkwZwIBADBiBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDIWNMj7bSbS+2Elk7AIBEIA19kIxY963r1FKvLPCGkxBWO8eeoXcCO328F5ETVssZWpwA0yGpTS4+d33tvmKy5fBwbF/WjA=',
+    # SlackbotCult
+    '10081119': 'AQECAHhntcgbgv4UZX6JXua2kg8IhT6cbre0WCSiz7xcx7nC8AAAAHgwdgYJKoZIhvcNAQcGoGkwZwIBADBiBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDAZkSTizbKK+SI8otgIBEIA1B4n/BZN2FK8VcAQtpL6jmNbTJ+Wamv25+GxpqCeDfyhhL7tfemPWP7Gi8BDrNczREoEksYs=',
+    # SlackbotTest
+    '20457310': 'AQECAHhntcgbgv4UZX6JXua2kg8IhT6cbre0WCSiz7xcx7nC8AAAAHgwdgYJKoZIhvcNAQcGoGkwZwIBADBiBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDN+mwLRa+fibbLkFugIBEIA14FM7+iYQcGzZFElfnQgnEFxaYL3Oaz7U+mFu+OHP6ZQ8XgNd3H5sKIdmF8SDmPYFWOuQjSM=',
+}
+
+# For tests.
+DEFAULT_GROUP = '20457310'
 
 
 class CustomFormatter(string.Formatter):
@@ -39,11 +50,8 @@ class CustomFormatter(string.Formatter):
                 raise e
 
 
-def post(msg):
+def post(msg, bot_id):
     """Post to GroupMe. Super easy. Except for the encrypted bot ID."""
-    blob = base64.b64decode(ENCRYPTED_BOT_ID)
-    client = boto3.client('kms')
-    bot_id = client.decrypt(CiphertextBlob=blob)['Plaintext']
     body = {
         'bot_id': bot_id,
         'text': msg,
@@ -51,8 +59,27 @@ def post(msg):
     return requests.post(API_URL, json=body)
 
 
+def get_bot_id(group):
+    """Get the bot ID for a group."""
+    blob = base64.b64decode(BOT_IDS[group])
+    client = boto3.client('kms')
+    bot_id = client.decrypt(CiphertextBlob=blob)['Plaintext']
+    return bot_id.decode('ascii')
+
+
+def reply(message, context, bot_id):
+    """Reply to a message that isn't a system/bot message."""
+    for expr, responses in RESPONSES:
+        if re.search(expr, message, re.I | re.U) is not None:
+            match = re.search(expr, message, re.I | re.U)
+            context.update(match.groupdict())
+            response = CustomFormatter().format(random.choice(responses),
+                                                **context)
+            post(response, bot_id)
+
+
 def handle(event, context):
-    # Data is a JSON object which was stashed into another JSON object...
+    """Main AWS Lambda entry point, handles a callback from GroupMe."""
     data = json.loads(event['body'])
 
     if 'system' in data and data['system']:
@@ -63,17 +90,14 @@ def handle(event, context):
         print('Got bot message, will not respond.')
         return
 
+    bot_id = get_bot_id(data['group_id'])
     context = {
         'name': data['name']
     }
+    reply(data['text'], context, bot_id)
 
-    for expr, responses in RESPONSES:
-        if re.search(expr, data['text'], re.I | re.U) is not None:
-            match = re.search(expr, data['text'], re.I | re.U)
-            context.update(match.groupdict())
-            response = CustomFormatter().format(random.choice(responses),
-                                                **context)
-            post(response)
-            print(response)
 
-    print('No response.')
+if __name__ == '__main__':
+    import sys
+    post = lambda x, y: print(x)
+    reply(sys.argv[1], {'name': 'stdin'}, get_bot_id(DEFAULT_GROUP))
