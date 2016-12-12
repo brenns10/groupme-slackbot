@@ -73,12 +73,27 @@ def get_bot_id(group):
 
 def reply(message, context, bot_id):
     """Reply to a message that isn't a system/bot message."""
-    for expr, responses in RESPONSES:
-        if re.search(expr, message, re.I | re.U) is not None:
-            match = re.search(expr, message, re.I | re.U)
-            context.update(match.groupdict())
+    for tup in RESPONSES:
+        # Unpack response tuple.
+        expr = tup[0]
+        responses = tup[1]
+        probability = tup[2] if len(tup) > 2 else 1.0
+
+        # Try to match the message.
+        match = re.search(expr, message, re.I | re.U)
+
+        # We reply if the pattern matched and the odds are with us.
+        if match and random.random() <= probability:
+            # Make a copy of the context to isolate any modifications.
+            ctxcpy = context.copy()
+
+            # Update the context with anything captured by the regex.
+            if match:
+                ctxcpy.update(match.groupdict())
+
+            # Generate and post a response.
             response = CustomFormatter().format(random.choice(responses),
-                                                **context)
+                                                **ctxcpy)
             post(response, bot_id)
 
 
