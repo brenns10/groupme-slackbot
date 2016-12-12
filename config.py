@@ -1,4 +1,15 @@
 # -*- coding: utf-8 -*-
+"""Slackbot response configuration.
+
+This module should contain a single list named RESPONSES. Each entry should be
+either a two or three tuple. The first element is a regular expression to be
+searched for in a message. The second element is a list of responses to be
+chosen and "formatted" before sending to the group. The last (optional) element
+is a probability that the response will be used (assumed to be 1 if not
+present).
+
+"""
+
 from __future__ import unicode_literals
 
 RESPONSES = [
