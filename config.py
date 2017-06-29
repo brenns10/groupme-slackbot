@@ -171,10 +171,8 @@ RESPONSES = [
     (
         r'joe?partment',
         [
-            'I think you mean Stepartment.',
-            "We're calling it the Steplex now.",
-            'Karl lives there too!',
-            "Karlpartment? It just doesn't have the same ring to it.",
+            'I think you mean the batcave.',
+            "FINE, we can call it the Joepartment.",
         ],
     ),
     (
@@ -202,19 +200,18 @@ RESPONSES = [
             'https://cdn.meme.am/cache/instances/folder101/48979101.jpg',
             'http://myrecipemagic.com/uploads/recipes/72003/1423583772_gumbo-sloppy-joes.jpg',
         ],
-    )
+    ),
+    (
+        r'(sausage|hot dogs|^dicks\.?$|so many dicks|^cocks\.?$|phallus)',
+        [
+            'https://media.giphy.com/media/JVqeFxl3Qo8/200.gif',
+        ],
+    ),
 ]
 
 
 SPECIFIC_RESPONSES = {
     # SlackbotTest
     '20457310': [
-        (
-            '.*',
-            [
-                'Are you testing me?  Why don\'t you just trust me?',
-            ],
-            0.2,
-        ),
     ],
 }
